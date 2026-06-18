@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PesaCoach - Your Financial Assistant</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230FA958'/><text x='16' y='22' text-anchor='middle' font-size='16' font-weight='bold' fill='white'>P</text></svg>">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #F9FAFB;
+      --text: #1F2937;
+      --text-secondary: #6B7280;
+      --card-bg: #ffffff;
+      --card-border: #E5E7EB;
+      --card-shadow: rgba(0,0,0,0.08);
+      --divider: #F3F4F6;
+      --icon-green-bg: #DFF5E8; --icon-gold-bg: #F6E7B2; --icon-blue-bg: #DBEAFE; --icon-gray-bg: #F3F4F6;
+      --lang-en-bg: #DFF5E8; --lang-sw-bg: #DBEAFE; --lang-text: #4B5563;
+      --feature-hover-border: #0FA958;
+    }
+    html.dark {
+      --bg: #0F172A;
+      --bg-secondary: #0F172A;
+      --text: #F9FAFB;
+      --text-secondary: #9CA3AF;
+      --card-bg: #1F2937;
+      --card-border: #374151;
+      --card-shadow: rgba(0,0,0,0.3);
+      --divider: #374151;
+      --icon-green-bg: #064E3B; --icon-gold-bg: #422006; --icon-blue-bg: #1E3A8A; --icon-gray-bg: #374151;
+      --lang-en-bg: #064E3B; --lang-sw-bg: #1E3A8A; --lang-text: #9CA3AF;
+      --feature-hover-border: #22C55E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text); line-height: 1.6; overflow-x: hidden;
+      background: var(--bg); transition: background 0.3s, color 0.3s;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+    .svg-icon { display: inline-flex; align-items: center; justify-content: center; }
+    .svg-icon svg { width: 100%; height: 100%; display: block; }
+
+    .top-bar {
+      position: fixed; top: 20px; right: 20px; z-index: 1000;
+      display: flex; gap: 8px; align-items: center;
+    }
+    .toggle-group {
+      display: flex; gap: 4px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+      border-radius: 8px; padding: 4px; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .lang-btn {
+      padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: all 0.2s;
+      background: transparent; color: rgba(255,255,255,0.6);
+    }
+    .lang-btn.active { background: #fff; color: #0FA958; }
+    .lang-btn:hover:not(.active) { color: #fff; }
+
+    .theme-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.8); transition: all 0.2s;
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .theme-btn .svg-icon { width: 18px; height: 18px; }
+    html.dark .theme-btn { border-color: rgba(255,255,255,0.15); }
+
+    .hero {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #0FA958 0%, #0C7A40 40%, #0F172A 100%);
+      color: #fff; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%);
+      top: -200px; right: -200px; border-radius: 50%;
+    }
+    .hero::after {
+      content: ''; position: absolute; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%);
+      bottom: -100px; left: -100px; border-radius: 50%;
+    }
+    .hero-content { text-align: center; position: relative; z-index: 1; padding: 40px 20px; }
+    .hero-logo {
+      width: 100px; height: 100px; background: rgba(255,255,255,0.15);
+      border-radius: 24px; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.2); color: #fff;
+    }
+    .hero-logo .svg-icon { width: 52px; height: 52px; }
+    .hero h1 { font-size: clamp(42px, 8vw, 72px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+    .hero .subtitle { font-size: clamp(18px, 3vw, 28px); margin: 12px 0 8px; opacity: 0.9; font-weight: 400; }
+    .hero .tagline { font-size: clamp(16px, 2.5vw, 22px); color: rgba(255,255,255,0.7); margin-bottom: 40px; }
+    .hero-badge {
+      display: inline-block; padding: 6px 16px; border-radius: 20px;
+      background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.3);
+      color: #FFD700; font-size: 13px; font-weight: 600; margin-bottom: 20px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 32px; border-radius: 12px; font-size: 16px; font-weight: 700;
+      border: none; cursor: pointer; transition: all 0.3s; text-decoration: none;
+    }
+    .btn .svg-icon { width: 20px; height: 20px; }
+    .btn-primary { background: #fff; color: #0FA958; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(15,169,88,0.3); }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+    .btn-gold { background: linear-gradient(135deg, #D4AF37, #FFD700); color: #1F2937; }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212,175,55,0.4); }
+    .scroll-indicator {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      animation: bounce 2s infinite; opacity: 0.5; cursor: pointer;
+    }
+    .scroll-indicator .svg-icon { width: 28px; height: 28px; }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+    section { padding: 80px 0; transition: background 0.3s; }
+    .section-header { text-align: center; margin-bottom: 56px; }
+    .section-header h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; color: #0FA958; }
+    .section-header p { font-size: 18px; color: var(--text-secondary); margin-top: 8px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .bg-light { background: var(--bg-secondary); }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+    .feature-card {
+      background: var(--card-bg); border-radius: 16px; padding: 32px 24px;
+      transition: all 0.3s; border: 1px solid var(--card-border);
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px var(--card-shadow); border-color: var(--feature-hover-border); }
+    .feature-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; transition: background 0.3s; }
+    .feature-icon .svg-icon { width: 24px; height: 24px; }
+    .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+    .icon-green { background: var(--icon-green-bg); color: #0FA958; }
+    .icon-gold { background: var(--icon-gold-bg); color: #D4AF37; }
+    .icon-blue { background: var(--icon-blue-bg); color: #2563EB; }
+    .icon-gray { background: var(--icon-gray-bg); color: var(--text-secondary); }
+
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; }
+    .step { text-align: center; }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; font-size: 22px; font-weight: 800;
+      background: rgba(15,169,88,0.1); color: #0FA958; border: 2px solid #0FA958;
+    }
+    .step h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: start; }
+    .pricing-card {
+      background: var(--card-bg); border-radius: 20px; padding: 40px 32px;
+      border: 1px solid var(--card-border); transition: all 0.3s; position: relative;
+    }
+    .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px var(--card-shadow); }
+    .pricing-card.featured {
+      border-color: #D4AF37; box-shadow: 0 0 0 1px #D4AF37, 0 12px 40px rgba(212,175,55,0.1);
+      transform: scale(1.02);
+    }
+    .pricing-card.featured:hover { transform: scale(1.02) translateY(-4px); }
+    .pricing-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #D4AF37, #FFD700); color: #1F2937;
+      padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .pricing-card h3 { font-size: 22px; font-weight: 800; }
+    .pricing-card .price { font-size: 36px; font-weight: 800; margin: 12px 0; color: #0FA958; }
+    .pricing-card .price span { font-size: 16px; font-weight: 400; color: var(--text-secondary); }
+    .pricing-card .desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+    .pricing-card ul { list-style: none; padding: 0; margin-bottom: 32px; }
+    .pricing-card li { padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--divider); }
+    .pricing-card li:last-child { border-bottom: none; }
+    .pricing-card li .check { color: #0FA958; font-weight: 700; }
+    .pricing-card li .cross { color: #D1D5DB; }
+    .pricing-card .btn { width: 100%; justify-content: center; }
+
+    .bilingual-showcase {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+    }
+    .bilingual-showcase .lang-block { padding: 32px; border-radius: 16px; transition: background 0.3s; }
+    .lang-block-en { background: var(--lang-en-bg); }
+    .lang-block-sw { background: var(--lang-sw-bg); }
+    .lang-block h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .lang-block .flag { font-size: 32px; margin-bottom: 8px; }
+    .lang-block p { color: var(--lang-text); font-size: 15px; transition: color 0.3s; }
+
+    .footer {
+      background: #0F172A; color: #fff; padding: 40px 0;
+      text-align: center;
+    }
+    .footer .footer-logo { font-size: 24px; font-weight: 800; color: #22C55E; margin-bottom: 8px; }
+    .footer p { color: #6B7280; font-size: 14px; }
+    .footer .btn { margin-top: 20px; }
+    .footer .btn .svg-icon { width: 20px; height: 20px; }
+
+    @media (max-width: 768px) {
+      section { padding: 50px 0; }
+      .bilingual-showcase { grid-template-columns: 1fr; }
+      .pricing-card.featured { transform: none; }
+      .pricing-card.featured:hover { transform: translateY(-4px); }
+      .top-bar { top: 12px; right: 12px; gap: 6px; }
+      .lang-btn { padding: 5px 10px; font-size: 12px; }
+      .theme-btn { width: 32px; height: 32px; }
+    }
+
+    .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    .apk-info { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 12px; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="toggle-group" role="tablist">
+    <button class="lang-btn active" data-lang="en" role="tab">EN</button>
+    <button class="lang-btn" data-lang="sw" role="tab">SW</button>
+  </div>
+  <button class="theme-btn" id="themeToggle" aria-label="Toggle dark mode">
+    <span class="svg-icon" data-icon="moon"></span>
+  </button>
+</div>
+
+<section class="hero" id="home">
+  <div class="hero-content container">
+    <div class="hero-badge" data-i18n="premium">AI-POWERED</div>
+    <div class="hero-logo"><span class="svg-icon" data-icon="coin"></span></div>
+    <h1>PesaCoach</h1>
+    <p class="subtitle" data-i18n="heroSubtitle">Your Financial Assistant</p>
+    <p class="tagline" data-i18n="heroTagline">Track. Save. Grow.</p>
+    <div class="hero-buttons">
+      <a href="#" class="btn btn-primary"><span class="svg-icon" data-icon="download"></span> <span data-i18n="downloadBtn">Download APK</span></a>
+      <a href="#features" class="btn btn-secondary"><span data-i18n="learnMore">Learn More</span> <span class="svg-icon" data-icon="chevron-down"></span></a>
+    </div>
+    <p class="apk-info" data-i18n="apkInfo">Version 1.0.0 · Android APK · 25 MB</p>
+  </div>
+  <div class="scroll-indicator"><span class="svg-icon" data-icon="chevron-down"></span></div>
+</section>
+
+<section id="features">
+  <div class="container">
+    <div class="section-header">
+      <h2 data-i18n="featuresTitle">Why PesaCoach?</h2>
+      <p data-i18n="featuresSubtitle">Everything you need to take control of your finances in one app.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-green"><span class="svg-icon" data-icon="chart"></span></div>
+        <h3 data-i18n="feat1Title">Track Income & Expenses</h3>
+        <p data-i18n="feat1Desc">Record your daily transactions across multiple categories. Know exactly where your money goes.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-blue"><span class="svg-icon" data-icon="ai"></span></div>
+        <h3 data-i18n="feat2Title">AI Financial Assistant</h3>
+        <p data-i18n="feat2Desc">Get personalized advice from your AI coach. Ask questions about budgeting, saving, and investing.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-green"><span class="svg-icon" data-icon="target"></span></div>
+        <h3 data-i18n="feat3Title">Budget Management</h3>
+        <p data-i18n="feat3Desc">Set monthly limits per category. Track your progress with visual budget bars.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-gold"><span class="svg-icon" data-icon="trophy"></span></div>
+        <h3 data-i18n="feat4Title">Savings Goals</h3>
+        <p data-i18n="feat4Desc">Set goals and watch your wealth grow. Premium users can track unlimited goals.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-blue"><span class="svg-icon" data-icon="recurring"></span></div>
+        <h3 data-i18n="feat5Title">Recurring Payments</h3>
+        <p data-i18n="feat5Desc">Track subscriptions and recurring bills. Mark as paid or skip with one tap.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-gold"><span class="svg-icon" data-icon="bell"></span></div>
+        <h3 data-i18n="feat6Title">Smart Alerts</h3>
+        <p data-i18n="feat6Desc">Get notified when you overspend, when bills are due, or when savings drop.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-green"><span class="svg-icon" data-icon="trending"></span></div>
+        <h3 data-i18n="feat7Title">Trend Reports</h3>
+        <p data-i18n="feat7Desc">See your financial patterns over time. Monthly, quarterly, and yearly reports.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon icon-gray"><span class="svg-icon" data-icon="moon"></span></div>
+        <h3 data-i18n="feat8Title">Dark Mode</h3>
+        <p data-i18n="feat8Desc">Switch between light and dark themes. Easy on the eyes, day or night.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-light" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <h2 data-i18n="howTitle">How It Works</h2>
+      <p data-i18n="howSubtitle">Get started in minutes. No credit card required.</p>
+    </div>
+    <div class="steps">
+      <div class="step fade-in">
+        <div class="step-num">1</div>
+        <h3 data-i18n="step1Title">Download the App</h3>
+        <p data-i18n="step1Desc">Download the PesaCoach APK and install it on your Android device.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">2</div>
+        <h3 data-i18n="step2Title">Create Your Account</h3>
+        <p data-i18n="step2Desc">Sign up with email or Google. Choose your preferred language and currency.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">3</div>
+        <h3 data-i18n="step3Title">Track Your Finances</h3>
+        <p data-i18n="step3Desc">Start recording income and expenses. Set budgets and savings goals.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">4</div>
+        <h3 data-i18n="step4Title">Grow Your Wealth</h3>
+        <p data-i18n="step4Desc">Use AI insights to make smarter financial decisions. Watch your savings grow.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <h2 data-i18n="pricingTitle">Simple Pricing</h2>
+      <p data-i18n="pricingSubtitle">Start free. Upgrade when you need more power.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card fade-in">
+        <h3 data-i18n="planFree">Free</h3>
+        <div class="price">TSh 0 <span data-i18n="perMonth">/month</span></div>
+        <p class="desc" data-i18n="planFreeDesc">Perfect for getting started with basic financial tracking.</p>
+        <ul>
+          <li><span class="check">✓</span> <span data-i18n="pf1">Income & expense tracking</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pf2">Monthly summaries</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pf3">5 AI messages / day</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pf4">Dark mode & bilingual</span></li>
+          <li><span class="cross">✗</span> <span data-i18n="pf5">Recurring payments</span></li>
+          <li><span class="cross">✗</span> <span data-i18n="pf6">Savings goals</span></li>
+        </ul>
+        <a href="#" class="btn btn-primary" data-i18n="getStarted">Get Started</a>
+      </div>
+
+      <div class="pricing-card featured fade-in">
+        <div class="pricing-badge" data-i18n="popular">POPULAR</div>
+        <h3>Silver</h3>
+        <div class="price">TSh 2,999 <span data-i18n="perMonth">/month</span></div>
+        <p class="desc" data-i18n="planSilverDesc">Best value for serious savers who want more control.</p>
+        <ul>
+          <li><span class="check">✓</span> <span data-i18n="ps1">Everything in Free</span></li>
+          <li><span class="check">✓</span> <span data-i18n="ps2">Unlimited AI messages</span></li>
+          <li><span class="check">✓</span> <span data-i18n="ps3">2 recurring payments</span></li>
+          <li><span class="check">✓</span> <span data-i18n="ps4">3 savings goals</span></li>
+          <li><span class="check">✓</span> <span data-i18n="ps5">Budget alerts & 3-month reports</span></li>
+          <li><span class="check">✓</span> <span data-i18n="ps6">CSV export</span></li>
+        </ul>
+        <a href="#" class="btn btn-gold" data-i18n="upgradeSilver">Upgrade to Silver</a>
+      </div>
+
+      <div class="pricing-card fade-in">
+        <h3>Gold</h3>
+        <div class="price">TSh 3,999 <span data-i18n="perMonth">/month</span></div>
+        <p class="desc" data-i18n="planGoldDesc">For power users who want the full PesaCoach experience.</p>
+        <ul>
+          <li><span class="check">✓</span> <span data-i18n="pg1">Everything in Silver</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pg2">Unlimited recurring payments</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pg3">Unlimited savings goals</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pg4">6 & 12-month trend reports</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pg5">PDF export</span></li>
+          <li><span class="check">✓</span> <span data-i18n="pg6">Advanced AI coaching</span></li>
+        </ul>
+        <a href="#" class="btn btn-gold" data-i18n="upgradeGold">Upgrade to Gold</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-light" id="languages">
+  <div class="container">
+    <div class="section-header">
+      <h2 data-i18n="langTitle">English & Kiswahili</h2>
+      <p data-i18n="langSubtitle">Use PesaCoach in the language you're most comfortable with.</p>
+    </div>
+    <div class="bilingual-showcase">
+      <div class="lang-block lang-block-en fade-in">
+        <div class="flag">🇬🇧</div>
+        <h3>English</h3>
+        <p data-i18n="langEnDesc">Full English interface with all features, AI assistant responses, and reports available in English.</p>
+      </div>
+      <div class="lang-block lang-block-sw fade-in">
+        <div class="flag">🇹🇿</div>
+        <h3>Kiswahili</h3>
+        <p data-i18n="langSwDesc">Maelekezo yote, msaidizi wa AI, na ripoti zinapatikana kwa Kiswahili. PesaCoach imeundwa kwa ajili yako.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer" id="download">
+  <div class="container">
+    <div class="footer-logo">PesaCoach</div>
+    <p data-i18n="footerTagline">Your Financial Assistant · Msaidizi Wako wa Fedha</p>
+    <a href="#" class="btn btn-gold"><span class="svg-icon" data-icon="download"></span> <span data-i18n="downloadFooter">Download PesaCoach APK</span></a>
+    <p style="margin-top: 24px; font-size: 13px; color: #4B5563;" data-i18n="copyright">© 2026 PesaCoach. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  const ICONS = {
+    coin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="13" font-weight="800" fill="currentColor" stroke="none">$</text>
+    </svg>`,
+    download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>`,
+    'chevron-down': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>`,
+    chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>`,
+    ai: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-4 4 4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z"/>
+      <path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/>
+      <circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/>
+      <path d="M12 17v3"/><path d="M8 22h8"/>
+    </svg>`,
+    target: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+    </svg>`,
+    trophy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+      <path d="M6 5h12v4a6 6 0 0 1-12 0V5z"/><path d="M10 15h4v4h-4z"/><path d="M12 19v3"/>
+    </svg>`,
+    recurring: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+    </svg>`,
+    bell: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>`,
+    trending: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+    </svg>`,
+    moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>`,
+    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>`,
+  };
+
+  document.querySelectorAll('[data-icon]').forEach(el => {
+    const name = el.dataset.icon;
+    if (ICONS[name]) el.innerHTML = ICONS[name];
+  });
+
+  const i18n = {
+    en: {
+      premium: 'AI-POWERED', heroSubtitle: 'Your Financial Assistant', heroTagline: 'Track. Save. Grow.',
+      downloadBtn: 'Download APK', learnMore: 'Learn More',
+      apkInfo: 'Version 1.0.0 · Android APK · 25 MB',
+      featuresTitle: 'Why PesaCoach?', featuresSubtitle: 'Everything you need to take control of your finances in one app.',
+      feat1Title: 'Track Income & Expenses', feat1Desc: 'Record your daily transactions across multiple categories. Know exactly where your money goes.',
+      feat2Title: 'AI Financial Assistant', feat2Desc: 'Get personalized advice from your AI coach. Ask questions about budgeting, saving, and investing.',
+      feat3Title: 'Budget Management', feat3Desc: 'Set monthly limits per category. Track your progress with visual budget bars.',
+      feat4Title: 'Savings Goals', feat4Desc: 'Set goals and watch your wealth grow. Premium users can track unlimited goals.',
+      feat5Title: 'Recurring Payments', feat5Desc: 'Track subscriptions and recurring bills. Mark as paid or skip with one tap.',
+      feat6Title: 'Smart Alerts', feat6Desc: 'Get notified when you overspend, when bills are due, or when savings drop.',
+      feat7Title: 'Trend Reports', feat7Desc: 'See your financial patterns over time. Monthly, quarterly, and yearly reports.',
+      feat8Title: 'Dark Mode', feat8Desc: 'Switch between light and dark themes. Easy on the eyes, day or night.',
+      howTitle: 'How It Works', howSubtitle: 'Get started in minutes. No credit card required.',
+      step1Title: 'Download the App', step1Desc: 'Download the PesaCoach APK and install it on your Android device.',
+      step2Title: 'Create Your Account', step2Desc: 'Sign up with email or Google. Choose your preferred language and currency.',
+      step3Title: 'Track Your Finances', step3Desc: 'Start recording income and expenses. Set budgets and savings goals.',
+      step4Title: 'Grow Your Wealth', step4Desc: 'Use AI insights to make smarter financial decisions. Watch your savings grow.',
+      pricingTitle: 'Simple Pricing', pricingSubtitle: 'Start free. Upgrade when you need more power.',
+      planFree: 'Free', perMonth: '/month', planFreeDesc: 'Perfect for getting started with basic financial tracking.',
+      pf1: 'Income & expense tracking', pf2: 'Monthly summaries', pf3: '5 AI messages / day', pf4: 'Dark mode & bilingual', pf5: 'Recurring payments', pf6: 'Savings goals',
+      getStarted: 'Get Started', popular: 'POPULAR',
+      planSilverDesc: 'Best value for serious savers who want more control.',
+      ps1: 'Everything in Free', ps2: 'Unlimited AI messages', ps3: '2 recurring payments', ps4: '3 savings goals', ps5: 'Budget alerts & 3-month reports', ps6: 'CSV export',
+      upgradeSilver: 'Upgrade to Silver',
+      planGoldDesc: 'For power users who want the full PesaCoach experience.',
+      pg1: 'Everything in Silver', pg2: 'Unlimited recurring payments', pg3: 'Unlimited savings goals', pg4: '6 & 12-month trend reports', pg5: 'PDF export', pg6: 'Advanced AI coaching',
+      upgradeGold: 'Upgrade to Gold',
+      langTitle: 'English & Kiswahili', langSubtitle: 'Use PesaCoach in the language you\'re most comfortable with.',
+      langEnDesc: 'Full English interface with all features, AI assistant responses, and reports available in English.',
+      langSwDesc: 'Maelekezo yote, msaidizi wa AI, na ripoti zinapatikana kwa Kiswahili. PesaCoach imeundwa kwa ajili yako.',
+      footerTagline: 'Your Financial Assistant · Msaidizi Wako wa Fedha',
+      downloadFooter: 'Download PesaCoach APK',
+      copyright: '© 2026 PesaCoach. All rights reserved.',
+    },
+    sw: {
+      premium: 'INAYOENDESHWA NA AI', heroSubtitle: 'Msaidizi Wako wa Fedha', heroTagline: 'Fuatilia. Weka. Kua.',
+      downloadBtn: 'Pakua APK', learnMore: 'Jifunze Zaidi',
+      apkInfo: 'Toleo 1.0.0 · APK ya Android · 25 MB',
+      featuresTitle: 'Kwa Nini PesaCoach?', featuresSubtitle: 'Kila kitu unachohitaji kudhibiti fedha zako kwenye app moja.',
+      feat1Title: 'Fuatilia Mapato na Matumizi', feat1Desc: 'Rekodi shughuli zako za kila siku kwa kategoria mbalimbali. Jua pesa zako zinaenda wapi.',
+      feat2Title: 'Msaidizi wa AI wa Fedha', feat2Desc: 'Pata ushauri wa kibinafsi kutoka kwa kocha wako wa AI. Uliza maswali kuhusu bajeti, akiba, na uwekezaji.',
+      feat3Title: 'Usimamizi wa Bajeti', feat3Desc: 'Weka vikomo vya kila mwezi kwa kila kategoria. Fuatilia maendeleo yako kwa vizigeuzi vya bajeti.',
+      feat4Title: 'Malengo ya Akiba', feat4Desc: 'Weka malengo na tazama utajiri wako ukikua. Watumiaji wa premium wanaweza kufuatilia malengo yasiyo na kikomo.',
+      feat5Title: 'Malipo ya Mara kwa Mara', feat5Desc: 'Fuatilia usajili na bili za mara kwa mara. Weka alama ya kulipwa au ruka kwa kugusa mara moja.',
+      feat6Title: 'Arifa Mahiri', feat6Desc: 'Pata arifa unapozidisha bajeti, bili zinapokomaa, au akiba inapopungua.',
+      feat7Title: 'Ripoti za Mwenendo', feat7Desc: 'Ona mwelekeo wako wa kifedha kwa muda. Ripoti za kila mwezi, kila robo mwaka, na kila mwaka.',
+      feat8Title: 'Hali ya Giza', feat8Desc: 'Badilisha kati ya mandhari nyepesi na nyeusi. Inastarehe macho, mchana au usiku.',
+      howTitle: 'Inavyofanya Kazi', howSubtitle: 'Anza kwa dakika chache. Hakuna kadi ya mkopo inayohitajika.',
+      step1Title: 'Pakua App', step1Desc: 'Pakua APK ya PesaCoach na usakinishe kwenye kifaa chako cha Android.',
+      step2Title: 'Fungua Akaunti', step2Desc: 'Jiandikisha kwa barua pepe au Google. Chagua lugha na sarafu unayopendelea.',
+      step3Title: 'Fuatilia Fedha Zako', step3Desc: 'Anza kurekodi mapato na matumizi. Weka bajeti na malengo ya akiba.',
+      step4Title: 'Kua Utajiri Wako', step4Desc: 'Tumia maarifa ya AI kufanya maamuzi sahihi ya kifedha. Tazama akiba yako ikikua.',
+      pricingTitle: 'Bei Rahisi', pricingSubtitle: 'Anza bure. Boresha unapohitaji nguvu zaidi.',
+      planFree: 'Bure', perMonth: '/mwezi', planFreeDesc: 'Inafaa kwa kuanzia na ufuatiliaji wa kimsingi wa fedha.',
+      pf1: 'Ufuatiliaji wa mapato na matumizi', pf2: 'Muhtasari wa kila mwezi', pf3: 'Jumbe 5 za AI / siku', pf4: 'Hali ya giza na lugha mbili', pf5: 'Malipo ya mara kwa mara', pf6: 'Malengo ya akiba',
+      getStarted: 'Anza Sasa', popular: 'UMAKINI',
+      planSilverDesc: 'Thamani bora kwa waweka akiba wanaotaka udhibiti zaidi.',
+      ps1: 'Kila kitu katika Bure', ps2: 'Jumbe za AI zisizo na kikomo', ps3: 'Malipo 2 ya mara kwa mara', ps4: 'Malengo 3 ya akiba', ps5: 'Arifa za bajeti na ripoti za miezi 3', ps6: 'Kusafirisha CSV',
+      upgradeSilver: 'Boresha hadi Silver',
+      planGoldDesc: 'Kwa watumiaji wenye nguvu wanaotaka uzoefu kamili wa PesaCoach.',
+      pg1: 'Kila kitu katika Silver', pg2: 'Malipo ya mara kwa mara yasiyo na kikomo', pg3: 'Malengo ya akiba yasiyo na kikomo', pg4: 'Ripoti za mwenendo wa miezi 6 na 12', pg5: 'Kusafirisha PDF', pg6: 'Ushauri wa hali ya juu wa AI',
+      upgradeGold: 'Boresha hadi Gold',
+      langTitle: 'Kiingereza na Kiswahili', langSubtitle: 'Tumia PesaCoach kwa lugha unayostarehe nayo zaidi.',
+      langEnDesc: 'Mwonekano kamili wa Kiingereza wenye vipengele vyote, majibu ya msaidizi wa AI, na ripoti zinazopatikana kwa Kiingereza.',
+      langSwDesc: 'Full Kiswahili interface with all features, AI assistant responses, and reports available in Kiswahili. PesaCoach was built for you.',
+      footerTagline: 'Your Financial Assistant · Msaidizi Wako wa Fedha',
+      downloadFooter: 'Pakua APK ya PesaCoach',
+      copyright: '© 2026 PesaCoach. Haki zote zimehifadhiwa.',
+    }
+  };
+
+  let currentLang = 'en';
+  function setLang(lang) {
+    currentLang = lang;
+    const texts = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (texts[key]) el.textContent = texts[key];
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    document.documentElement.lang = lang === 'sw' ? 'sw' : 'en';
+  }
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => setLang(btn.dataset.lang));
+  });
+
+  // === Dark Mode ===
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = themeToggle.querySelector('[data-icon]');
+
+  function setTheme(dark) {
+    const html = document.documentElement;
+    html.classList.toggle('dark', dark);
+    themeIcon.dataset.icon = dark ? 'sun' : 'moon';
+    themeIcon.innerHTML = ICONS[dark ? 'sun' : 'moon'];
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }
+
+  const stored = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setTheme(stored ? stored === 'dark' : prefersDark);
+
+  themeToggle.addEventListener('click', () => {
+    setTheme(!document.documentElement.classList.contains('dark'));
+  });
+
+  // === Scroll Animations ===
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  setLang('en');
+</script>
+</body>
+</html>
